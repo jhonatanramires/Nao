@@ -26,8 +26,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 
 # /////////////////// PROJECT-SPECIFIC DEPENDENCIES ///////////////////////////////
 
-# Dependencies for Custom Tools
-from tools import tools
+
 
 class AgentHandler:
     class State(TypedDict):
@@ -35,7 +34,8 @@ class AgentHandler:
 
     def __init__(self, api_key,tools,model_name):
         self.llm = ChatAnthropic(model_name=model_name, api_key=api_key)
-        self.llm_with_tools = self.llm.bind_tools(tools)
+        self.tools = tools
+        self.llm_with_tools = self.llm.bind_tools(self.tools)
         self.memory = SqliteSaver.from_conn_string("memory")
         self.graph = self._setup_graph()
         self.config = {"configurable": {"thread_id": "1"}}
@@ -46,7 +46,7 @@ class AgentHandler:
     def _setup_graph(self):
         graph_builder = StateGraph(self.State)
         graph_builder.add_node("chatbot", self._chatbot)
-        tool_node = ToolNode(tools)
+        tool_node = ToolNode(self.tools)
         graph_builder.add_node("tools", tool_node)
         graph_builder.add_conditional_edges("chatbot", tools_condition)
         graph_builder.add_edge(START, "chatbot")
@@ -78,6 +78,8 @@ class AgentHandler:
                 event["messages"][-1].pretty_print()
 
 if __name__ == "__main__":
+    # Dependencies for Custom Tools
+    from tools import tools
     api_key = "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"
     chatbot = AgentHandler(api_key,tools,"claude-3-haiku-20240307")
     chatbot.display_graph()
