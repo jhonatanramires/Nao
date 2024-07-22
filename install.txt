@@ -7,3 +7,4 @@ pip install tavily-python
 pip install speech_recognition
 pip install python-dotenv
 pip install dotenv
+pip install openmeteo_requests
