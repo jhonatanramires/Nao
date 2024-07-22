@@ -1,0 +1,9 @@
+pip install typing typing_extensions 
+pip install langgraph 
+pip install langchain_anthropic IPython langchain_community
+pip install pillow
+pip install qi 
+pip install tavily-python
+pip install speech_recognition
+pip install python-dotenv
+pip install dotenv
