@@ -4,12 +4,19 @@
 """Example: Use goToPosture Method"""
 
 import sys
+import dotenv
+import os
 
 sys.path.append("C:\\Users\\Windows 10\\Pictures\\Nao\\lib")
 
 import qi
 import argparse
 
+# Cargar las variables del archivo .env
+dotenv.load_dotenv("..\\.env")
+
+# Acceder a las variables de entorno
+naoip = os.getenv('NAO_IP')
 
 def main(session):
     """
@@ -37,9 +44,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     session = qi.Session()
     try:
-        session.connect("tcp://" + args.ip + ":" + str(args.port))
+        session.connect("tcp://" + naoip + ":" + str(args.port))
     except RuntimeError:
-        print ("Can't connect to Naoqi at ip \"" + args.ip + "\" on port " + str(args.port) +".\n"
+        print ("Can't connect to Naoqi at ip \"" + naoip + "\" on port " + str(args.port) +".\n"
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)
     main(session)

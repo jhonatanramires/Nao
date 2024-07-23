@@ -1,11 +1,19 @@
 import sys
 import codecs
+import dotenv
+import os
 
 sys.path.append("C:\\Users\\Windows 10\\Pictures\\Nao\\lib")
 
 from naoqi import ALProxy
 
-tts = ALProxy("ALTextToSpeech", "169.254.73.222", 9559)
+# Cargar las variables del archivo .env
+dotenv.load_dotenv("..\\.env")
+
+# Acceder a las variables de entorno
+naoip = os.getenv('NAO_IP')
+
+tts = ALProxy("ALTextToSpeech", naoip, 9559)
 
 phrase = ""
 
