@@ -13,6 +13,6 @@ model_name = os.getenv('MODEL')
 
 print(api_key,model_name)
 
-chatbot = AgentHandler(api_key,tools,"claude-3-haiku-20240307")
+chatbot = AgentHandler(api_key,tools,"claude-3-haiku-20240307",1)
 chatbot.display_graph()
 chatbot.chat()

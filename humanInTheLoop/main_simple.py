@@ -30,7 +30,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 from tools import tools
 
 #LLM Chat Setup
-llm = ChatAnthropic(model_name="claude-3-haiku-20240307",api_key="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")
+llm = ChatAnthropic(model_name="claude-3-haiku-20240307",api_key="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")
 llm_with_tools = llm.bind_tools(tools)
 
 #Memory Management
@@ -70,15 +70,15 @@ graph = graph_builder.compile(
 )
 
 #Graph Display
-try:
-    img_data = graph.get_graph().draw_mermaid_png()
-    if img_data:
-        img = PILImage.open(io.BytesIO(img_data))
-        img.show()
-    else:
-        print("La imagen no se ha generado correctamente.")
-except Exception as e:
-    print(f"Error generando la imagen: {e}")
+#try:
+#    img_data = graph.get_graph().draw_mermaid_png()
+#    if img_data:
+#        img = PILImage.open(io.BytesIO(img_data))
+#        img.show()
+#    else:
+#        print("La imagen no se ha generado correctamente.")
+#except Exception as e:
+#    print(f"Error generando la imagen: {e}")
 
 #configurations
 config = {"configurable": {"thread_id": "1"}}

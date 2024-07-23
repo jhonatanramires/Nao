@@ -25,23 +25,33 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_core.messages import AIMessage, ToolMessage
 
 # /////////////////// PROJECT-SPECIFIC DEPENDENCIES ///////////////////////////////
-
+from dotenv import load_dotenv
+import os
 
 
 class AgentHandler:
     class State(TypedDict):
         messages: Annotated[list, add_messages]
 
-    def __init__(self, api_key,tools,model_name):
-        self.llm = ChatAnthropic(model_name=model_name, api_key=api_key)
+    def __init__(self, api_key,tools,model_name,thread_id):
         self.tools = tools
+        self.llm = ChatAnthropic(model_name=model_name, api_key=api_key)
         self.llm_with_tools = self.llm.bind_tools(self.tools)
-        self.memory = SqliteSaver.from_conn_string("memory")
+        self.memory = SqliteSaver.from_conn_string(":memory:")
         self.graph = self._setup_graph()
-        self.config = {"configurable": {"thread_id": "1"}}
+        self.config = {"configurable": {"thread_id": f"{thread_id}"}}
 
     def _chatbot(self, state: State):
-        return {"messages": [self.llm_with_tools.invoke(state["messages"])]}
+        messages = state["messages"]
+        print("Debug: Messages before LLM invocation:", messages)
+        for message in messages:
+            if isinstance(message, ToolMessage):
+                # Asegúrate de que el resultado de la herramienta tenga el campo 'type'
+                if 'type' not in message.content:
+                    message.content['type'] = 'function'  # o el tipo apropiado
+        result = self.llm_with_tools.invoke(messages)
+        print("Debug: LLM response:", result)
+        return {"messages": [result]}
 
     def _setup_graph(self):
         graph_builder = StateGraph(self.State)
@@ -65,22 +75,28 @@ class AgentHandler:
             print(f"Error generating the image: {e}")
 
     def chat(self):
-        while True:
-            user_input = input("User: ")
-            if user_input.lower() in ["quit", "exit", "q"]:
-                print("Goodbye!")
-                break
-            for event in self.graph.stream(
-                {"messages": [("user", user_input)]},
-                {"configurable": {"thread_id": "2"}},
-                stream_mode="values"
-            ):
+      while True:
+        user_input = input("User: ")
+        if user_input.lower() in ["quit", "exit", "q"]:
+            print("Goodbye!")
+            break
+        try:
+            for event in self.graph.stream({"messages": [("user", user_input)]}, self.config, stream_mode="values"):
                 event["messages"][-1].pretty_print()
+        except Exception as e:
+            print(f"Error occurred: {e}")
+            # Aquí podrías agregar más lógica para manejar errores específicos
 
 if __name__ == "__main__":
     # Dependencies for Custom Tools
     from tools import tools
-    api_key = "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"
-    chatbot = AgentHandler(api_key,tools,"claude-3-haiku-20240307")
-    chatbot.display_graph()
+    # Cargar las variables del archivo .env
+    load_dotenv()
+
+    # Acceder a las variables de entorno
+    api_key = os.getenv('API_KEY')
+    model_name = os.getenv('MODEL')
+    chatbot = AgentHandler(api_key,tools,"claude-3-haiku-20240307",1)
+    #chatbot.display_graph()
     chatbot.chat()
+
